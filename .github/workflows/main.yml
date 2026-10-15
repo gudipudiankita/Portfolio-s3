@@ -47,7 +47,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.9.8"
+          terraform_version: "1.10.5"
 
       - name: Terraform Init
         run: terraform init -input=false
@@ -62,6 +62,15 @@ jobs:
       - name: Terraform Apply
         if: github.event_name == 'push' || inputs.operation == 'apply'
         run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Display Portfolio Website URL
+        if: github.event_name == 'push' || inputs.operation == 'apply'
+        run: |
+          echo "## Portfolio Website" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "[Open My Portfolio]($(terraform output -raw portfolio_website_url))" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Website URL: $(terraform output -raw portfolio_website_url)"
 
       - name: Check Destroy Confirmation
         if: github.event_name == 'workflow_dispatch' && inputs.operation == 'destroy' && inputs.confirm_destroy != 'DESTROY'
